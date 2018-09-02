@@ -7,7 +7,7 @@
 		revision="0.1"
 		conf="scala-tool"
 		confs="compile, runtime, test, provided, optional, compile-internal, runtime-internal, test-internal, plugin, pom, scala-tool"
-		date="20180902121142"/>
+		date="20180902183837"/>
 	<dependencies>
 		<module organisation="org.scala-lang.modules" name="scala-xml_2.12">
 			<revision name="1.0.6" status="release" pubdate="20161101195105" resolver="sbt-chain" artresolver="sbt-chain" homepage="http://www.scala-lang.org/" downloaded="false" searched="false" default="false" conf="compile, runtime(*), master(compile), runtime, compile(*), master" position="0">

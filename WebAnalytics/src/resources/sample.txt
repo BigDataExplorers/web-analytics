@@ -1,0 +1,7 @@
+18/09/02 18:51:59 INFO Utils: Successfully started service 'org.apache.spark.network.netty.NettyBlockTransferService' on port 62320.
+ 18/09/02 18:51:59 INFO NettyBlockTransferService: Server created on 172.17.242.31:62320
+ 18/09/02 18:51:59 INFO BlockManager: Using org.apache.spark.storage.RandomBlockReplicationPolicy for block replication policy
+ 18/09/02 18:51:59 INFO BlockManagerMaster: Registering BlockManager BlockManagerId(driver, 172.17.242.31, 62320, None)
+ 18/09/02 18:51:59 INFO BlockManagerMasterEndpoint: Registering block manager 172.17.242.31:62320 with 899.7 MB RAM, BlockManagerId(driver, 172.17.242.31, 62320, None)
+ 18/09/02 18:51:59 INFO BlockManagerMaster: Registered BlockManager BlockManagerId(driver, 172.17.242.31, 62320, None)
+ 18/09/02 18:51:59 INFO BlockManager: Initialized BlockManager: BlockManagerId(driver, 172.17.242.31, 62320, None)

@@ -2,10 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$USER_HOME$/Documents/WebAnalytics/.idea/modules/Documents-webanalytics.iml" filepath="$USER_HOME$/Documents/WebAnalytics/.idea/modules/Documents-webanalytics.iml" />
-      <module fileurl="file://$USER_HOME$/Documents/WebAnalytics/.idea/modules/WebAnalytics-webanalytics-build.iml" filepath="$USER_HOME$/Documents/WebAnalytics/.idea/modules/WebAnalytics-webanalytics-build.iml" />
-      <module fileurl="file://$USER_HOME$/Documents/.idea/modules/documents.iml" filepath="$USER_HOME$/Documents/.idea/modules/documents.iml" />
-      <module fileurl="file://$USER_HOME$/Documents/.idea/modules/documents-build.iml" filepath="$USER_HOME$/Documents/.idea/modules/documents-build.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/webanalytics.iml" filepath="$PROJECT_DIR$/.idea/modules/webanalytics.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/webanalytics-build.iml" filepath="$PROJECT_DIR$/.idea/modules/webanalytics-build.iml" />
     </modules>
