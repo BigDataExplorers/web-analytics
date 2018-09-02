@@ -1,0 +1,68 @@
+
+INGESTION STARTED AT Sun Sep  2 10:44:59 UTC 2018
+
+---Reading property from ./app.properties ---
+
+============================================
+Log File Path: ../log_data/jul-31-1995
+HDFS Path: /user/bdhlabuser18/web_analytics/log_data
+============================================
+
+***** Changing file type to CSV *****
+
+***** /user/bdhlabuser18/web_analytics/log_data/jul-31-1995 Not in HDFS ******
+***** Creating the hdfs path with date as name ******
+***** Moving File to HDFS ******
+File present at /user/bdhlabuser18/web_analytics/log_data/jul-31-1995/
+***** Log file successfully copied to HDFS *****
+
+
+INGESTION STARTED AT Sun Sep  2 10:45:09 UTC 2018
+
+---Reading property from ./app.properties ---
+
+============================================
+Log File Path: ../log_data/jul-31-1995
+HDFS Path: /user/bdhlabuser18/web_analytics/log_data
+============================================
+
+***** The file type is already CSV *****
+
+***** The log file already exists on HDFS *****
+
+
+============================================================================
+
+INGESTION STARTED AT Sun Sep  2 10:47:12 UTC 2018
+
+---Reading property from ./app.properties ---
+
+============================================
+Log File Path: ../log_data/jul-31-1995
+HDFS Path: /user/bdhlabuser18/web_analytics/log_data
+============================================
+
+***** Changing file type to CSV *****
+
+***** /user/bdhlabuser18/web_analytics/log_data/jul-31-1995 Not in HDFS ******
+***** Creating the hdfs path with date as name ******
+***** Moving File to HDFS ******
+File present at /user/bdhlabuser18/web_analytics/log_data/jul-31-1995/
+***** Log file successfully copied to HDFS *****
+
+
+============================================================================
+
+INGESTION STARTED AT Sun Sep  2 10:47:22 UTC 2018
+
+---Reading property from ./app.properties ---
+
+============================================
+Log File Path: ../log_data/jul-31-1995
+HDFS Path: /user/bdhlabuser18/web_analytics/log_data
+============================================
+
+***** The file type is already CSV *****
+
+***** The log file already exists on HDFS *****
+
