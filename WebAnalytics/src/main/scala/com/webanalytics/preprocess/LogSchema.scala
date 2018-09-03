@@ -1,6 +1,13 @@
 package com.webanalytics.preprocess
 import org.apache.spark.sql.types._
 
+/**
+ * The object defines the schema for the log file data
+ *
+ * @author  Naveen Srinivasan
+ * @version 1.0
+ * @since   2018-09-03
+ */
 object LogSchema {
   /**
    * The Schema for the log file is given here
@@ -12,7 +19,7 @@ object LogSchema {
       StructField("timestamp", StringType, true) ::
       StructField("timezone", StringType, true) ::
       StructField("request", StringType, true) ::
-      StructField("http_response_code", IntegerType, true) ::
-      StructField("bytes", IntegerType, true) :: Nil)
+      StructField("http_response_code", StringType, true) ::
+      StructField("bytes", StringType, true) :: Nil)
 
 }
