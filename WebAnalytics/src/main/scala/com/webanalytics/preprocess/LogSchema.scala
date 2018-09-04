@@ -21,5 +21,13 @@ object LogSchema {
       StructField("request", StringType, true) ::
       StructField("http_response_code", StringType, true) ::
       StructField("bytes", StringType, true) :: Nil)
+      
+   val ipMappingFileSchema = StructType(
+    StructField("begin_ip", StringType, true) ::
+      StructField("end_ip", StringType, true) ::
+      StructField("begin_ip_int", StringType, true) ::
+      StructField("end_ip_int", StringType, true) ::
+      StructField("country_code", StringType, true) ::
+      StructField("country", StringType, true) :: Nil)
 
 }
