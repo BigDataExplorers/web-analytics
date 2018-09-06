@@ -16,11 +16,4 @@ object IPEncryptor {
     new String(Base64.getEncoder.encode(cipher.doFinal(text.getBytes("utf-8"))), "utf-8")
   }
 
-  def main(args: Array[String]) {
-
-    val ad = encrypt("Hello.dsfsd.sdf")
-    println(ad)
-
-  }
-
 }

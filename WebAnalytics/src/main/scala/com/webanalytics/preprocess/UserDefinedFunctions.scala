@@ -50,4 +50,11 @@ object UserDefinedFunctions{
    * @return the last characters from host name
    */
   def hostToCountry = udf { ipString: String => ipString.split('.').last }
+  
+  /**
+   * UDF to get the date part the timestamp
+   * @param timestamp the host name
+   * @return date part
+   */
+  def timeStampToDate = udf { timestamp: String => timestamp.substring(0,10)}
 }

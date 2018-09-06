@@ -1,0 +1,141 @@
+
+set hive.exec.dynamic.partition=true;
+set hive.exec.dynamic.partition.mode=nonstrict;
+set hive.exec.max.dynamic.partitions.pernode=100000;
+set hive.exec.max.dynamic.partitions=100000;
+SET mapred.map.max.attempts = 100; 
+SET mapred.reduce.max.attempts = 100;
+SET mapred.skip.map.max.skip.records = 30000;
+SET mapred.skip.attempts.to.start.skipping = 1;
+set hive.merge.mapfiles=false;
+set hive.input.format=org.apache.hadoop.hive.ql.io.HiveInputFormat;
+set mapred.map.tasks = 20;
+set mapred.reduce.tasks = 20;
+
+USE web_log_analytics;
+
+CREATE EXTERNAL TABLE IF NOT EXISTS ext_log_data(
+encrypted_host STRING,
+datetime STRING,
+epoch INT,
+request STRING,
+http_response_code SMALLINT,
+bytes INT,
+request_url STRING,
+country STRING,
+year STRING,
+month STRING,
+day STRING
+)
+ROW FORMAT DELIMITED 
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+STORED AS TEXTFILE
+LOCATION '/user/bdhlabuser18/web_analytics/output/ip_country_mapping';
+
+
+CREATE TABLE IF NOT EXISTS partitioned_log_data(
+encrypted_host STRING,
+datetime STRING,
+epoch INT,
+request STRING,
+http_response_code SMALLINT,
+bytes INT,
+request_url STRING,
+country STRING
+)
+COMMENT 'A partitioned web log table'
+PARTITIONED BY(year STRING,month STRING,day STRING)
+STORED AS SEQUENCEFILE;
+
+INSERT OVERWRITE TABLE partitioned_log_data
+PARTITION (year, month, day)
+SELECT encrypted_host,
+datetime,
+epoch,
+request,
+http_response_code,
+bytes,
+request_url,
+country,
+year,
+month,
+day
+FROM ext_log_data;
+
+
+CREATE EXTERNAL TABLE IF NOT EXISTS ext_session_data(
+encrypted_host STRING,
+datetime STRING,
+epoch INT,
+request STRING,
+http_response_code SMALLINT,
+bytes INT,
+request_url STRING,
+country STRING,
+year INT,
+month INT,
+day INT,
+is_new_session TINYINT,
+session_id STRING
+)
+COMMENT 'Log data table with session ID'
+ROW FORMAT DELIMITED 
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+STORED AS TEXTFILE
+LOCATION '/user/bdhlabuser18/web_analytics/output/session_data';
+
+CREATE EXTERNAL TABLE IF NOT EXISTS ext_media_data(
+encrypted_host STRING,
+datetime STRING,
+request STRING,
+http_response_code SMALLINT,
+bytes INT
+)
+COMMENT 'Log data table with media requests'
+ROW FORMAT DELIMITED 
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+STORED AS TEXTFILE
+LOCATION '/user/bdhlabuser18/web_analytics/output/media_records';
+
+CREATE EXTERNAL TABLE IF NOT EXISTS ext_required_raw_data(
+encrypted_host STRING,
+datetime STRING,
+request STRING,
+http_response_code SMALLINT,
+bytes INT
+)
+COMMENT 'Log data table with required raw data for preprocessing'
+ROW FORMAT DELIMITED 
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+STORED AS TEXTFILE
+LOCATION '/user/bdhlabuser18/web_analytics/output/non_media_records';
+
+CREATE EXTERNAL TABLE IF NOT EXISTS ext_rejected_data(
+encrypted_host STRING,
+datetime STRING,
+request STRING,
+http_response_code SMALLINT,
+bytes INT
+)
+COMMENT 'Log data table with rejected records'
+ROW FORMAT DELIMITED 
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+STORED AS TEXTFILE
+LOCATION '/user/bdhlabuser18/web_analytics/output/reject_records';
+
+
+SELECT *, COUNT(last_visited) OVER (PARTITION BY session_id ORDER BY datetime) as page_count FROM(
+SELECT *, first_value(request_url) OVER (PARTITION BY session_id ORDER BY datetime) as first_visited,
+last_value(request_url) OVER (PARTITION BY session_id ORDER BY datetime) as last_visited 
+FROM( SELECT *,CONCAT(encrypted_host, CONCAT('_', SUM(new_session) 
+OVER (PARTITION BY encrypted_host ORDER BY datetime))) AS session_id 
+FROM (SELECT *,  epoch - LAG(epoch) 
+OVER (PARTITION BY encrypted_host ORDER BY datetime) as time_difference, 
+CASE WHEN epoch - LAG(epoch) OVER (PARTITION BY encrypted_host ORDER BY datetime) >= 30 * 60 
+THEN 1 ELSE 0 END AS new_session FROM partitioned_log_data) s1)s2)s3
+ORDER BY s3.session_id ASC, s3.datetime ASC
