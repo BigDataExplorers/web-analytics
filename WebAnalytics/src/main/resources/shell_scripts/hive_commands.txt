@@ -76,8 +76,12 @@ country STRING,
 year INT,
 month INT,
 day INT,
+session_time_difference INT,
 is_new_session TINYINT,
-session_id STRING
+session_id STRING,
+first_visited_page STRING,
+last_visited_page STRING,
+page_count INT
 )
 COMMENT 'Log data table with session ID'
 ROW FORMAT DELIMITED 
@@ -139,3 +143,29 @@ OVER (PARTITION BY encrypted_host ORDER BY datetime) as time_difference,
 CASE WHEN epoch - LAG(epoch) OVER (PARTITION BY encrypted_host ORDER BY datetime) >= 30 * 60 
 THEN 1 ELSE 0 END AS new_session FROM partitioned_log_data) s1)s2)s3
 ORDER BY s3.session_id ASC, s3.datetime ASC
+
+
+
+CREATE KEYSPACE web_log_analytics WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
+
+										
+
+CREATE TABLE web_log_analytics.daily_insights(
+insight_year int,
+insight_month int,
+insight_day int,
+insight_date text,
+unique_visitor_count int,
+user_session_count int,
+avg_session_duration float,
+page_views_count int,
+bounce_count int,
+bounce_rate float,
+new_users_count int,
+PRIMARY KEY ((insight_year, insight_month, insight_day), insight_date)
+)WITH CLUSTERING ORDER BY (insight_date ASC);
+
+
+
+
+
