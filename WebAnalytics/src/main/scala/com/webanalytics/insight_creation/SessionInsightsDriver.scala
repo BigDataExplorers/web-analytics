@@ -9,6 +9,7 @@ import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.{ Dataset, Row }
 import org.apache.spark.sql.functions.{ avg, desc, row_number, round }
 import org.apache.spark.sql.expressions.Window
+import com.datastax.spark.connector._
 
 /**
  * The object reads the log file and preprocess the data
@@ -17,7 +18,7 @@ import org.apache.spark.sql.expressions.Window
  * @version 1.0
  * @since   2018-09-03
  */
-object CreateSessionInsights {
+object SessionInsightsDriver {
 
   /**
    * The main method for the Insights Creation module
@@ -27,10 +28,12 @@ object CreateSessionInsights {
     // Creating the spark session
     val spark = SparkSession
       .builder()
-      .master("local")
+      //.master("local")
       .appName("Insight Creation")
-      //.enableHiveSupport()
+      .enableHiveSupport()
+      .config("spark.cassandra.connection.host", "10.0.1.10")
       .getOrCreate()
+      
 
     import spark.implicits._
     // Read the session file and create a dataframe
@@ -45,10 +48,11 @@ object CreateSessionInsights {
     val selected_data = sessionFileWithDate.filter($"dateColumn" === date)
     val insights = new CreateStoreInsights()
     val (siteInsights, popularAndExitTable, countryTraffic) = insights.createStoreInsights(spark, selected_data, date, topPageCount, topExitCount, numDaysForNewUSer)
-    siteInsights.show()
-    popularAndExitTable.show()
-    countryTraffic.show()
-    //print(selected_data.count())
+    
+    siteInsights.write.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "daily_insights", "keyspace" -> "web_log_analytics")).mode(SaveMode.Append).save()
+    popularAndExitTable.write.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "page_insights", "keyspace" -> "web_log_analytics")).mode(SaveMode.Append).save()
+    countryTraffic.write.format("org.apache.spark.sql.cassandra").options(Map( "table" -> "country_insights", "keyspace" -> "web_log_analytics")).mode(SaveMode.Append).save()
+    
 
   }
 }

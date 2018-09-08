@@ -154,7 +154,7 @@ CREATE TABLE web_log_analytics.daily_insights(
 insight_year int,
 insight_month int,
 insight_day int,
-insight_date text,
+insight_date date,
 unique_visitor_count int,
 user_session_count int,
 avg_session_duration float,
@@ -166,6 +166,20 @@ PRIMARY KEY ((insight_year, insight_month, insight_day), insight_date)
 )WITH CLUSTERING ORDER BY (insight_date ASC);
 
 
+CREATE TABLE web_log_analytics.page_insights(
+insight_date date,
+query_type text,
+request_url text,
+measure_value float,
+PRIMARY KEY ((query_type),insight_date, measure_value)
+)WITH CLUSTERING ORDER BY (insight_date ASC, measure_value DESC);
 
+
+CREATE TABLE web_log_analytics.country_insights(
+insight_date date,
+country_name text,
+page_request_count int,
+PRIMARY KEY (insight_date, page_request_count)
+)WITH CLUSTERING ORDER BY (page_request_count DESC);
 
 

@@ -8,7 +8,7 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.{ Dataset, Row }
-import org.apache.spark.sql.functions.{ avg, desc, row_number, round, col, lit}
+import org.apache.spark.sql.functions.{ avg, desc, row_number, round, col, lit, not }
 import org.apache.spark.sql.expressions.Window
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -25,7 +25,7 @@ import org.apache.hadoop.hdfs.server.namenode.INodeReference.WithCount
  */
 class CreateStoreInsights {
 
-  def createStoreInsights(spark: SparkSession, sessionizedData: Dataset[Row], insightDate: String, topPageCnt: Int, topExitCnt: Int, numDaysForNewUSer: Int): (Dataset[Row],Dataset[Row],Dataset[Row]) = {
+  def createStoreInsights(spark: SparkSession, sessionizedData: Dataset[Row], insightDate: String, topPageCnt: Int, topExitCnt: Int, numDaysForNewUSer: Int): (Dataset[Row], Dataset[Row], Dataset[Row]) = {
     import spark.implicits._
     import org.apache.spark.sql.DataFrame
     val sessionFileDf = sessionizedData
@@ -72,19 +72,20 @@ class CreateStoreInsights {
     exitRates.createOrReplaceTempView("exitRates")
     val topExitCount = topExitCnt
     val topExitPages = spark.sql(f"""SELECT 'Exit_Rate' as query_type, request_url, exit_rate FROM exitRates LIMIT $topExitCnt""")
-    
 
     // New users to the site
-    //val historicalHosts = spark.sql("SELECT DISTINCT encrypted_host FROM web_log_analytics.partitioned_log_data")
-    val historicalHostsData = spark.read.option("delimiter", ",")
-      .schema(sessionFileSchema).csv("src/main/resources/log_data/session_data.csv")
+    val historicalHostsData = spark.sql("SELECT * FROM web_log_analytics.ext_session_data")
+    //val historicalHostsData = spark.read.option("delimiter", ",")
+      //.schema(sessionFileSchema).csv("src/main/resources/log_data/session_data.csv")
     val histSessionFileWithDate = historicalHostsData.withColumn("dateColumn", historicalHostsData("datetime").cast(DateType))
-    val runDate = java.time.LocalDate.parse(insightDate).toString() 
+    val runDate = java.time.LocalDate.parse(insightDate).toString()
     val historyDate = new DateTime(runDate).minusDays(numDaysForNewUSer).toString().substring(0, 10)
     val todayData = sessionFileDf.select("encrypted_host").distinct()
-    val uniqueHostsHistory = histSessionFileWithDate.filter($"dateColumn" >= historyDate).select("encrypted_host").distinct()
+    todayData.createOrReplaceTempView("today_data")
+    val uniqueHostsHistory = histSessionFileWithDate.filter($"dateColumn" >= historyDate && $"dateColumn" < runDate)
     val historicalHosts = uniqueHostsHistory.select("encrypted_host").rdd.map(r => r(0)).collect.toList.mkString("'", "','", "'")
-    val newUsers = todayData.filter(!$"encrypted_host".isin(historicalHosts)).count()
+    val newUs = spark.sql(f"""SELECT encrypted_host FROM today_data WHERE encrypted_host NOT IN ($historicalHosts)""")
+    val newUsers = newUs.count()
 
     // Preparing data for the Daily Insight Table
 
@@ -107,13 +108,15 @@ class CreateStoreInsights {
 
     val siteData = Seq(Row(insight_year, insight_month, insight_day, insightDate, uniqueVisitors, totalUserSessions, avgSessionDuration, pageViews, bouncedSessionsCount, bounceRate, newUsers))
     val siteInsights = spark.createDataFrame(spark.sparkContext.parallelize(siteData), StructType(someSchema))
-    
+
     // Preparing Data for the Popular / High Exit Rate table
     val popularAndExitDf = popularPages.unionAll(topExitPages)
     val popularAndExitTable = popularAndExitDf.withColumn("insight_date", lit(runDate)).toDF(Seq("query_type", "request_url", "measure_value", "insight_date"): _*)
-    
+      .select("insight_date", "query_type", "request_url", "measure_value")
+
     // Preparing data for Country Traffic
     val countryTraffic = topCountries.withColumn("insight_date", lit(runDate)).toDF(Seq("country_name", "page_request_count", "insight_date"): _*)
+      .select("insight_date", "country_name", "page_request_count")
 
     return (siteInsights, popularAndExitTable, countryTraffic)
   }
