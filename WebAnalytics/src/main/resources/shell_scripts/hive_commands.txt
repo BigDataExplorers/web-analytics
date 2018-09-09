@@ -162,7 +162,7 @@ page_views_count int,
 bounce_count int,
 bounce_rate float,
 new_users_count int,
-PRIMARY KEY ((insight_year, insight_month, insight_day), insight_date)
+PRIMARY KEY ((insight_year, insight_month), insight_date)
 )WITH CLUSTERING ORDER BY (insight_date ASC);
 
 
